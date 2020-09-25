@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+#define NSUM 25
+
 // -------------------------------------------------- [ Section: Endianness ] -
 int isBigEndian() {
     int test = 1;
@@ -202,12 +204,24 @@ void waveToFile( Wave* wave, const char* filename ){
     toLittleEndian(sizeof(int), (void*)&(wave->header.subChunk2Size));
 }
 
+double gaussrand() {
+    double x = 0;
+    int i;
+    for(i = 0; i < NSUM; i++)
+        x += (double)rand() / RAND_MAX;
+
+    x -= NSUM / 2.0;
+    x /= sqrt(NSUM / 12.0);
+
+    return x;
+}
+
 // -------------------------------------------------------- [ Section: Main ] -
 int main(){
     // Define some variables for the sound
     float sampleRate = 44100.0; // hertz
     float freq = 440.0;         // hertz
-    float duration = 0.5;       // seconds
+    float duration = 500;       // seconds
 
     int nSamples = (int)(duration*sampleRate);
 
@@ -219,12 +233,12 @@ int main(){
     int i;
     float frameData[1];
     for(i=0; i<nSamples; i+=1 ){
-        frameData[0] = cos(freq*(float)i*3.14159/sampleRate);
+        frameData[0] = gaussrand();
         waveAddSample( &mySound, frameData );
     }
 
     // Write it to a file and clean up when done
-    waveToFile( &mySound, "mono-32bit.wav");
+    waveToFile( &mySound, "audio/noise.wav");
     waveDestroy( &mySound );
 
     return 0;
